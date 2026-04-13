@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Tracking Delivery</title>
+    <style>
+        /* ================= UI STYLE ================= */
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f4f7f6; margin: 0; padding: 20px; color: #333; }
+        .container { max-width: 1000px; margin: auto; background: white; padding: 25px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        h1, h2, h3 { color: #2c3e50; margin-top: 0; }
+        
+        /* Form & Buttons */
+        .form-group { margin-bottom: 15px; }
+        label { font-weight: bold; display: block; margin-bottom: 5px; }
+        input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
+        button { padding: 10px 15px; background: #2c3e50; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        button:hover { background: #1a252f; }
+        .btn-sm { padding: 6px 10px; font-size: 12px; margin-right: 5px; margin-bottom: 5px; }
+        
+        /* Tables */
+        .table-responsive { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; font-size: 14px; }
+        th { background: #ecf0f1; }
+        
+        /* Badges / Status Colors */
+        .badge { padding: 5px 10px; border-radius: 12px; font-size: 12px; font-weight: bold; color: white; display: inline-block; }
+        .bg-kuning { background: #f1c40f; color: #333; }
+        .bg-biru { background: #3498db; }
+        .bg-oranye { background: #e67e22; }
+        .bg-hijau { background: #2ecc71; }
+        .bg-merah { background: #e74c3c; }
+        .bg-abu { background: #95a5a6; }
+
+        /* Link Container */
+        #link-container { margin-top: 15px; padding: 15px; background: #d4edda; border: 1px solid #c3e6cb; color: #155724; border-radius: 5px; display: none; align-items: center; justify-content: space-between; }
+        #tracking-url { font-weight: bold; color: #0056b3; text-decoration: none; word-break: break-all; }
+
+        /* Progress Bar (Tracking Page) */
+        .tracking-card { border: 1px solid #eee; padding: 20px; border-radius: 8px; margin-bottom: 30px; }
+        .progress-container { display: flex; justify-content: space-between; position: relative; margin: 40px 0 60px 0; max-width: 600px; margin-left: auto; margin-right: auto; }
+        .progress-container::before { content: ''; background: #e0e0e0; position: absolute; top: 50%; left: 0; transform: translateY(-50%); height: 4px; width: 100%; z-index: 1; }
+        .progress-bar { background: #2ecc71; position: absolute; top: 50%; left: 0; transform: translateY(-50%); height: 4px; width: 0%; z-index: 1; transition: 0.4s ease; }
+        .circle { background: #fff; border: 3px solid #e0e0e0; border-radius: 50%; height: 30px; width: 30px; display: flex; align-items: center; justify-content: center; z-index: 2; transition: 0.4s ease; position: relative; }
+        .circle.active { border-color: #2ecc71; background: #2ecc71; color: white; }
+        .step-label { position: absolute; top: 40px; left: 50%; transform: translateX(-50%); font-size: 13px; font-weight: bold; color: #7f8c8d; text-align: center; width: max-content; }
+        .circle.active .step-label { color: #2c3e50; }
+
+        .hidden { display: none !important; }
+
+/* ================= TAMBAHAN MOBILE RESPONSIVE ================= */
+@media (max-width: 768px) {
+
+    body {
+        padding: 10px;
+    }
+
+    .container {
+        padding: 15px;
+        border-radius: 6px;
+    }
+
+    h1 {
+        font-size: 20px;
+        text-align: center;
+    }
+
+    input {
+        font-size: 14px;
+    }
+
+    button {
+        width: 100%;
+        padding: 12px;
+    }
+
+    .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    table {
+        font-size: 12px;
+        min-width: 600px;
+    }
+
+    th, td {
+        padding: 8px;
+        white-space: nowrap;
+    }
+
+    .progress-container {
+        transform: scale(0.9);
+    }
+}
+    </style>
+</head>
+<body>
+
+    <div id="admin-view" class="container hidden">
+        <h1>Dashboard Admin Delivery</h1>
+        
+        <div style="background: #fdfdfd; padding: 15px; border: 1px solid #eee; border-radius: 8px; margin-bottom: 20px;">
+            <h3>Tambah Pesanan Baru</h3>
+            <div class="form-group">
+                <label>Nama Customer</label>
+                <input type="text" id="customer-name" placeholder="Masukkan nama customer...">
+            </div>
+            <div class="form-group">
+                <label>Nama Pesanan</label>
+                <input type="text" id="order-name" placeholder="Contoh: 2x Nasi Goreng, 1x Es Teh...">
+            </div>
+            <button onclick="addOrder()">Tambah Order</button>
+        </div>
+
+        <div id="link-container">
+            <div>
+                <strong>Order berhasil dibuat!</strong> Link tracking: <br>
+                <a id="tracking-url" href="#" target="_blank"></a>
+            </div>
+            <button onclick="copyLink()" style="background: #155724;">Copy Link</button>
+        </div>
+
+        <h3>Daftar Pesanan</h3>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID Order</th>
+                        <th>Customer</th>
+                        <th>Pesanan</th>
+                        <th>Status</th>
+                        <th>Waktu Order</th>
+                        <th>Durasi</th>
+                        <th>Prediksi</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="table-body">
+                    </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="track-view" class="container hidden">
+        <h1 style="text-align: center;">Tracking Pesanan</h1>
+        
+        <div id="tracking-content">
+            <div class="tracking-card">
+                <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 15px;">
+                    <div>
+                        <span style="color: #7f8c8d; font-size: 14px;">ID Order</span><br>
+                        <strong id="track-id" style="font-size: 18px;">-</strong>
+                    </div>
+                    <div style="text-align: right;">
+                        <span style="color: #7f8c8d; font-size: 14px;">Estimasi Waktu</span><br>
+                        <strong style="font-size: 18px; color: #e67e22;">30 - 45 Menit</strong>
+                    </div>
+                </div>
+                
+                <h2 id="track-customer" style="margin-bottom: 5px;">-</h2>
+                <p id="track-order" style="color: #7f8c8d; margin-top: 0;">-</p>
+                <div style="margin-top: 15px;">Status saat ini: <span id="track-status-badge"></span></div>
+            </div>
+
+            <div class="progress-container">
+                <div class="progress-bar" id="progress"></div>
+                <div class="circle" id="step-1">1<div class="step-label">Menunggu</div></div>
+                <div class="circle" id="step-2">2<div class="step-label">Diproses</div></div>
+                <div class="circle" id="step-3">3<div class="step-label">Dikirim</div></div>
+                <div class="circle" id="step-4">4<div class="step-label">Selesai</div></div>
+            </div>
+            
+            <div style="text-align: center; margin-top: 20px;">
+                <button onclick="window.location.href='index.html'" style="background: #95a5a6;">Kembali ke Admin</button>
+            </div>
+        </div>
+        
+        <div id="tracking-not-found" class="hidden" style="text-align: center; padding: 40px;">
+            <h2>Pesanan Tidak Ditemukan</h2>
+            <p>Silakan periksa kembali Link / ID Order Anda.</p>
+            <button onclick="window.location.href='index.html'">Kembali</button>
+        </div>
+    </div>
+
+    <script>
+        // Array penyimpanan (Disimpan di localStorage agar tidak hilang saat di-refresh/buka tab baru)
+        let orders = JSON.parse(localStorage.getItem('deliveryOrders')) || [];
+        
+        // Cek URL untuk menentukan view (Admin atau Tracking)
+        const urlParams = new URLSearchParams(window.location.search);
+        const trackingId = urlParams.get('id');
+
+        if (trackingId) {
+            document.getElementById('track-view').classList.remove('hidden');
+            renderTrackingPage(trackingId);
+        } else {
+            document.getElementById('admin-view').classList.remove('hidden');
+            renderAdminTable();
+        }
+
+        // ================= FUNGSI ADMIN =================
+        function addOrder() {
+            const customerName = document.getElementById('customer-name').value;
+            const orderName = document.getElementById('order-name').value;
+
+            if (!customerName || !orderName) {
+                alert("Harap isi nama customer dan pesanan!");
+                return;
+            }
+
+            // Generate ID (Increment)
+            const newIdNum = orders.length > 0 ? parseInt(orders[orders.length-1].id.split('-')[1]) + 1 : 1;
+            const orderId = 'ORD-' + String(newIdNum).padStart(3, '0');
+            
+            // Format waktu
+            const now = new Date();
+            const timeString = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
+
+            const newOrder = {
+                id: orderId,
+                customer: customerName,
+                item: orderName,
+                status: 'Menunggu', // Default status
+                orderTime: timeString,
+                timestampStart: now.getTime(),
+                timestampEnd: null,
+                duration: '-',
+                prediction: '-'
+            };
+
+            orders.push(newOrder);
+            saveData();
+            
+            // Bersihkan form
+            document.getElementById('customer-name').value = '';
+            document.getElementById('order-name').value = '';
+
+            // Tampilkan Link
+            const baseUrl = window.location.href.split('?')[0];
+            const trackingLink = `${baseUrl}?id=${orderId}`;
+            document.getElementById('link-container').style.display = 'flex';
+            document.getElementById('tracking-url').href = trackingLink;
+            document.getElementById('tracking-url').innerText = trackingLink;
+
+            renderAdminTable();
+        }
+
+        function updateStatus(index, newStatus) {
+            orders[index].status = newStatus;
+
+            // Logika durasi & telat (Dihitung saat status Selesai)
+            if (newStatus === 'Selesai') {
+                const now = new Date().getTime();
+                orders[index].timestampEnd = now;
+                
+                // Hitung durasi (dalam menit)
+                const diffMs = orders[index].timestampEnd - orders[index].timestampStart;
+                const diffMins = Math.floor(diffMs / 60000); 
+                
+                // Karena ini simulasi, kita gunakan detik sebagai "menit" agar mudah ditest 
+                // (HAPUS baris ini untuk penggunaan aslinya. Disini 1 detik = 1 menit untuk testing)
+                const simulatedMins = Math.floor(diffMs / 1000); 
+
+                orders[index].duration = simulatedMins + ' menit';
+                orders[index].prediction = simulatedMins > 60 ? 'Telat' : 'Tidak Telat';
+            }
+
+            saveData();
+            renderAdminTable();
+        }
+
+        function renderAdminTable() {
+            const tbody = document.getElementById('table-body');
+            tbody.innerHTML = '';
+
+            // Loop array dari belakang (pesanan terbaru di atas)
+            for (let i = orders.length - 1; i >= 0; i--) {
+                const order = orders[i];
+                let statusBadge = '';
+                let actionBtns = '';
+
+                // Warna Status & Tombol Aksi
+                if (order.status === 'Menunggu') {
+                    statusBadge = '<span class="badge bg-kuning">Menunggu</span>';
+                    actionBtns = `<button class="btn-sm bg-biru" onclick="updateStatus(${i}, 'Diproses')">Proses</button>`;
+                } else if (order.status === 'Diproses') {
+                    statusBadge = '<span class="badge bg-biru">Diproses</span>';
+                    actionBtns = `<button class="btn-sm bg-oranye" onclick="updateStatus(${i}, 'Dikirim')">Kirim</button>`;
+                } else if (order.status === 'Dikirim') {
+                    statusBadge = '<span class="badge bg-oranye">Dikirim</span>';
+                    actionBtns = `<button class="btn-sm bg-hijau" onclick="updateStatus(${i}, 'Selesai')">Selesai</button>`;
+                } else if (order.status === 'Selesai') {
+                    statusBadge = '<span class="badge bg-hijau">Selesai</span>';
+                    actionBtns = `<span style="font-size:12px; color:gray;">Selesai</span>`;
+                }
+
+                // Warna Prediksi
+                let predBadge = '-';
+                if (order.prediction === 'Telat') predBadge = '<span class="badge bg-merah">Telat</span>';
+                else if (order.prediction === 'Tidak Telat') predBadge = '<span class="badge bg-hijau">Tidak Telat</span>';
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><strong>${order.id}</strong></td>
+                    <td>${order.customer}</td>
+                    <td>${order.item}</td>
+                    <td>${statusBadge}</td>
+                    <td>${order.orderTime}</td>
+                    <td>${order.duration}</td>
+                    <td>${predBadge}</td>
+                    <td>${actionBtns}</td>
+                `;
+                tbody.appendChild(tr);
+            }
+        }
+
+        function copyLink() {
+            const link = document.getElementById('tracking-url').innerText;
+            navigator.clipboard.writeText(link).then(() => {
+                alert("Link berhasil dicopy!");
+            });
+        }
+
+        // ================= FUNGSI TRACKING CUSTOMER =================
+        function renderTrackingPage(id) {
+            const order = orders.find(o => o.id === id);
+            
+            if (!order) {
+                document.getElementById('tracking-content').classList.add('hidden');
+                document.getElementById('tracking-not-found').classList.remove('hidden');
+                return;
+            }
+
+            document.getElementById('track-id').innerText = order.id;
+            document.getElementById('track-customer').innerText = order.customer;
+            document.getElementById('track-order').innerText = order.item;
+
+            // Set badge status
+            const badgeSpan = document.getElementById('track-status-badge');
+            let progressIndex = 1;
+
+            if (order.status === 'Menunggu') {
+                badgeSpan.className = 'badge bg-kuning';
+                progressIndex = 1;
+            } else if (order.status === 'Diproses') {
+                badgeSpan.className = 'badge bg-biru';
+                progressIndex = 2;
+            } else if (order.status === 'Dikirim') {
+                badgeSpan.className = 'badge bg-oranye';
+                progressIndex = 3;
+            } else if (order.status === 'Selesai') {
+                badgeSpan.className = 'badge bg-hijau';
+                progressIndex = 4;
+            }
+            badgeSpan.innerText = order.status;
+
+            // Update Progress Bar
+            const circles = [
+                document.getElementById('step-1'),
+                document.getElementById('step-2'),
+                document.getElementById('step-3'),
+                document.getElementById('step-4')
+            ];
+
+            // Reset circles
+            circles.forEach(c => c.classList.remove('active'));
+
+            // Aktifkan node yang sesuai
+            for (let i = 0; i < progressIndex; i++) {
+                circles[i].classList.add('active');
+            }
+
+            // Atur lebar garis penghubung
+            const progressBar = document.getElementById('progress');
+            const percentages = ['0%', '33%', '66%', '100%'];
+            progressBar.style.width = percentages[progressIndex - 1];
+        }
+
+        // ================= UTILITAS =================
+        function saveData() {
+            localStorage.setItem('deliveryOrders', JSON.stringify(orders));
+        }
+    </script>
+</body>
+</html>
