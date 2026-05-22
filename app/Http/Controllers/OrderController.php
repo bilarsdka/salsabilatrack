@@ -23,7 +23,7 @@ class OrderController extends Controller
             ]);
 
             // Generate order number: ORD-001, ORD-002, etc.
-            $lastOrder = Order::latest()->first();
+            $lastOrder = Order::orderByRaw('CAST(SUBSTRING(order_number, 5) AS UNSIGNED) DESC')->first();
             $nextNumber = $lastOrder ? intval(substr($lastOrder->order_number, 4)) + 1 : 1;
             $orderNumber = 'ORD-'.str_pad($nextNumber, 3, '0', STR_PAD_LEFT);
 
@@ -47,6 +47,39 @@ class OrderController extends Controller
                 'order_time' => $orderTime,
                 'estimated_duration' => $estimatedDuration,
             ]);
+
+            try {
+                $jumlahAntrian = Order::where('status', '!=', 'completed')->count();
+                $pythonPath = 'C:\\Program Files\\Python312\\python.exe';
+                $scriptPath = base_path('ml/predict.py');
+                
+                $itemsArg = escapeshellarg($request->order_items);
+                $command = "\"$pythonPath\" \"$scriptPath\" $orderTime $jumlahAntrian $estimatedDuration $itemsArg full 2>&1";
+                $rawOutput = trim(shell_exec($command));
+
+                \Log::info('Command: ' . $command);
+                \Log::info('Raw output: ' . $rawOutput);
+
+                $lines = explode("\n", $rawOutput);
+                $lastLine = trim(end($lines));
+
+                \Log::info('Final output: ' . $lastLine);
+
+                $mlResult = json_decode($lastLine, true);
+
+                if (json_last_error() === JSON_ERROR_NONE && isset($mlResult['prediksi'])) {
+                    $order->prediction = $mlResult['prediksi'];
+                    if (!empty($mlResult['estimasi_menit'])) {
+                        $order->estimated_duration = $mlResult['estimasi_menit'];
+                    }
+                    if (!empty($mlResult['kategori_jam'])) {
+                        $order->jam_kategori = $mlResult['kategori_jam'];
+                    }
+                    $order->save();
+                }
+            } catch (\Exception $e) {
+                \Log::error('Prediction error: ' . $e->getMessage());
+            }
 
             return response()->json([
                 'success' => true,
@@ -87,7 +120,7 @@ class OrderController extends Controller
             }
 
             // Calculate duration in minutes
-            $startTime = $order->started_at;
+            $startTime = $order->created_at;
             $duration = now()->diffInMinutes($startTime);
 
             // Ensure minimum 1 minute if same minute

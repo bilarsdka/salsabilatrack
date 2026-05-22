@@ -53,7 +53,7 @@
                         <input type="text" id="tracking-url" readonly
                             class="flex-1 px-4 py-2 bg-white border border-green-300 rounded-lg text-sm text-gray-700"
                             onclick="this.select()">
-                        <button onclick="copyTrackingLink()" 
+                        <button onclick="copyTrackingLink(document.getElementById('tracking-url').value)"
                             class="ml-2 px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 transition">
                             Copy Link
                         </button>
@@ -79,7 +79,7 @@
 
         <!-- Responsive Table -->
         <div class="overflow-x-auto rounded-lg border border-gray-200 shadow-sm">
-            <table class="w-full text-sm table-fixed">
+            <table class="w-full text-sm">
                 <thead class="bg-gradient-to-r from-primary-500 to-primary-600 text-white">
                     <tr>
                         <th class="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider w-24">ID Order</th>
@@ -90,6 +90,7 @@
                         <th class="px-3 py-3 text-center text-xs font-semibold uppercase tracking-wider w-20">Waktu</th>
                         <th class="px-3 py-3 text-center text-xs font-semibold uppercase tracking-wider w-20">Durasi</th>
                         <th class="px-3 py-3 text-center text-xs font-semibold uppercase tracking-wider w-24">Prediksi</th>
+                        <th class="px-3 py-3 text-center text-xs font-semibold uppercase tracking-wider w-24">Hasil</th>
                         <th class="px-3 py-3 text-center text-xs font-semibold uppercase tracking-wider w-20">Link</th>
                         <th class="px-3 py-3 text-center text-xs font-semibold uppercase tracking-wider w-28">Aksi</th>
                     </tr>
@@ -194,7 +195,7 @@ async function loadOrders() {
                 // Empty state
                 tbody.innerHTML = `
                     <tr>
-                        <td colspan="10" class="px-3 py-12 text-center text-gray-500">
+                        <td colspan="11" class="px-3 py-12 text-center text-gray-500">
                             <div class="flex flex-col items-center justify-center">
                                 <svg class="w-12 h-12 text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
@@ -268,7 +269,7 @@ function createOrderRow(order) {
             actionButtons = `
                 <div class="flex items-center justify-center gap-1">
                     <button onclick="updateStatus('${order.order_number}', 'processing')" 
-                        class="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs font-medium hover:bg-blue-200 transition"
+                        class="px-4 py-2 bg-blue-100 text-blue-700 rounded-lg text-sm font-semibold hover:bg-blue-200 transition"
                         title="Proses">
                         Proses
                     </button>
@@ -369,14 +370,26 @@ function createOrderRow(order) {
         ? order.duration_minutes + 'm' 
         : '-';
     
+   
     // Prediction badge
     let predictionBadge = '-';
-    if (order.status === 'completed') {
-        predictionBadge = order.is_late
-            ? '<span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-700"><span class="w-1.5 h-1.5 rounded-full bg-red-500 mr-1"></span>Telat</span>'
-            : '<span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700"><span class="w-1.5 h-1.5 rounded-full bg-green-500 mr-1"></span>Tepat</span>';
+    if (order.prediction === 'Telat') {
+        predictionBadge = '<span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-700"><span class="w-1.5 h-1.5 rounded-full bg-red-500 mr-1"></span>Telat</span>';
+    } else if (order.prediction === 'Tepat') {
+        predictionBadge = '<span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700"><span class="w-1.5 h-1.5 rounded-full bg-green-500 mr-1"></span>Tepat</span>';
     }
-    
+
+    // result aktual
+    let hasilBadge = '-';
+    if (order.status === 'completed' && order.duration_minutes !== null) {
+        if (order.duration_minutes <= order.estimated_duration) {
+            hasilBadge = '<span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700"><span class="w-1.5 h-1.5 rounded-full bg-green-500 mr-1"></span>Tepat</span>';
+        } else {
+            hasilBadge = '<span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-700"><span class="w-1.5 h-1.5 rounded-full bg-red-500 mr-1"></span>Telat</span>';
+        }
+    }
+
+
     tr.innerHTML = `
         <td class="px-3 py-3">
             <span class="font-mono font-semibold text-gray-800 text-sm">${order.order_number}</span>
@@ -401,6 +414,9 @@ function createOrderRow(order) {
         </td>
         <td class="px-3 py-3 text-center">
             ${predictionBadge}
+        </td>
+        <td class="px-3 py-3 text-center">
+            ${hasilBadge}
         </td>
         <td class="px-3 py-3 text-center">
             ${trackingButton}

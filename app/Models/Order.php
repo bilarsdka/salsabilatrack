@@ -20,6 +20,8 @@ class Order extends Model
         'duration_minutes',
         'estimated_duration',
         'is_late',
+        'prediction',
+        'jam_kategori',
     ];
 
     protected $casts = [
@@ -64,9 +66,10 @@ class Order extends Model
         };
     }
 
+    
     public function scopeRecent($query)
     {
-        return $query->orderBy('created_at', 'desc');
+    return $query->orderBy('id', 'desc');
     }
 
     public function scopePending($query)
