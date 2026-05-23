@@ -17,4 +17,29 @@ class TrackingController extends Controller
 
         return view('tracking.index', compact('order'));
     }
+
+    /**
+     * AJAX endpoint: return current remaining estimate + status for the tracking page.
+     * Called by JS every 30 s so the countdown stays accurate.
+     */
+    public function dynamic($orderNumber)
+    {
+        $order = Order::where('order_number', $orderNumber)->first();
+
+        if (! $order) {
+            return response()->json([
+                'remaining' => 0,
+                'status'    => 'not_found',
+            ]);
+        }
+
+        $remaining = $order->status === 'completed'
+            ? 'Selesai'
+            : (int) $order->dynamic_estimate;
+
+        return response()->json([
+            'remaining' => $remaining,
+            'status'    => $order->status,
+        ]);
+    }
 }

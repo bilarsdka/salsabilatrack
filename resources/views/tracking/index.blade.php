@@ -21,14 +21,14 @@
                 <div class="bg-gradient-to-r from-green-500 to-green-600 text-white px-6 py-3 rounded-xl shadow-lg">
                     <span class="text-2xl font-bold">Selesai</span>
                 </div>
-                @elseif($order->dynamic_estimate && is_numeric($order->dynamic_estimate))
-                <div class="bg-gradient-to-r from-purple-500 to-purple-600 text-white px-6 py-3 rounded-xl shadow-lg">
-                    <span class="text-2xl font-bold" id="dynamic-estimate">{{ $order->dynamic_estimate }}</span>
-                    <span class="text-sm ml-1">Menit</span>
+                @elseif(is_numeric($order->dynamic_estimate) && (int)$order->dynamic_estimate >= 0)
+                <div class="bg-gradient-to-r from-purple-500 to-purple-600 text-white px-6 py-3 rounded-xl shadow-lg js-estimate-box"  id="dynamic-estimate" data-estimate-url="{{ route('tracking.dynamic', $order->order_number) }}">
+                    <span class="text-2xl font-bold js-estimate-text">{{ $order->dynamic_estimate }}</span>
+                    <span class="text-sm ml-1 js-estimate-unit">Menit</span>
                 </div>
                 @else
                 <div class="bg-gradient-to-r from-gray-400 to-gray-500 text-white px-6 py-3 rounded-xl shadow-lg">
-                    <span class="text-2xl font-bold">30-45</span>
+                    <span class="text-2xl font-bold">--</span>
                     <span class="text-sm ml-1">Menit</span>
                 </div>
                 @endif
@@ -153,28 +153,55 @@
 
 @if($order->status !== 'completed')
 <script>
-// Auto-refresh page every 60 seconds to get updated estimate
-setTimeout(function() {
-    window.location.reload();
-}, 60000);
+(function () {
+    const box     = document.querySelector('.js-estimate-box');
+    const textEl  = document.querySelector('.js-estimate-text');
+    const unitEl  = document.querySelector('.js-estimate-unit');
+    let   minutes = '{{ $order->dynamic_estimate }}';
+    const isNum   = !isNaN(parseInt(minutes));
+    const apiUrl  = box ? box.dataset.estimateUrl : null;
 
-// Optional: Countdown timer for visual feedback
-let estimateElem = document.getElementById('dynamic-estimate');
-if (estimateElem) {
-    let minutes = parseInt(estimateElem.textContent);
-    if (!isNaN(minutes) && minutes > 0) {
-        setInterval(function() {
-            minutes--;
-            if (minutes <= 0) {
-                estimateElem.textContent = '0';
-                // Reload when timer reaches 0
-                setTimeout(() => window.location.reload(), 2000);
-            } else {
-                estimateElem.textContent = minutes;
-            }
-        }, 60000); // Update every minute
+    // ---- Countdown: decrement every second (only integer minutes) ----
+    function tick() {
+        if (!isNum) return;
+        let m = parseInt(minutes, 10);
+        if (m > 0) {
+            minutes = String(m - 1);
+            if (textEl) textEl.textContent = minutes;
+        } else {
+            // Time's up — reload page to get updated status
+            setTimeout(() => window.location.reload(), 2000);
+        }
     }
-}
+
+    // Sync metres with the wall-clock: reset tick at each full minute boundary
+    let lastSecond = new Date().getSeconds();
+    const syncTimer = setInterval(function () {
+        const s = new Date().getSeconds();
+        if (s !== lastSecond) {
+            lastSecond = s;
+            if (s === 0) tick();   // tick exactly at minute boundary
+        }
+    }, 250);
+
+    // ---- AJAX poll: refresh estimate every 30 s ----
+    if (apiUrl) {
+        setInterval(function () {
+            fetch(apiUrl, { headers: { 'Accept': 'application/json' } })
+                .then(function (r) { return r.json(); })
+                .then(function (data) {
+                    if (typeof data.remaining === 'number' && !isNaN(data.remaining)) {
+                        minutes = String(data.remaining);
+                        if (textEl) textEl.textContent = minutes;
+                    }
+                    if (data.status === 'completed') {
+                        window.location.reload();
+                    }
+                })
+                .catch(function () { /* silently ignore poll errors */ });
+        }, 30000);
+    }
+})();
 </script>
 @endif
 @endsection

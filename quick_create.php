@@ -1,16 +1,13 @@
 <?php
 
-// Quick test to create order
+use App\Models\Order;
+use Illuminate\Http\Request;
+
 require __DIR__.'/vendor/autoload.php';
 $app = require_once __DIR__.'/bootstrap/app.php';
 $app->make('Illuminate\Contracts\Http\Kernel')->handle(
     Request::create('/test-create', 'GET')
 );
-echo "Test complete\n";
-
-// Or simpler: use tinker alternative
-use App\Models\Order;
-use Illuminate\Http\Request;
 
 $countBefore = Order::count();
 echo "Orders before: $countBefore\n";

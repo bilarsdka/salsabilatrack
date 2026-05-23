@@ -138,6 +138,109 @@
         .bg-pattern {
             background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23f97316' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
         }
+
+        /* ── Menu Card Grid ──────────────────────────────────────────── */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.625rem;
+        }
+        @media (min-width: 640px) { .card-grid { grid-template-columns: repeat(3, 1fr); } }
+        @media (min-width: 768px) { .card-grid { grid-template-columns: repeat(4, 1fr); } }
+
+        .menu-card {
+            display: flex;
+            flex-direction: column;
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.625rem;
+            overflow: hidden;
+            transition: box-shadow 180ms ease, transform 180ms ease;
+        }
+        .menu-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.10);
+            transform: translateY(-1px);
+        }
+        .card-accent {
+            height: 3px;
+            background: linear-gradient(90deg, #f97316 0%, #fb923c 100%);
+        }
+        .card-body {
+            padding: 0.5rem 0.625rem 0;
+            min-height: 3rem;
+            display: flex;
+            align-items: center;
+        }
+        .card-name {
+            font-size: 0.8125rem;
+            font-weight: 600;
+            color: #1f2937;
+            line-height: 1.35;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            word-break: break-word;
+        }
+        .card-footer {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.375rem 0.625rem 0.5rem;
+        }
+        .btn-qty {
+            width: 1.625rem;
+            height: 1.625rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #d1d5db;
+            border-radius: 0.375rem;
+            background: #f3f4f6;
+            color: #374151;
+            font-size: 0.875rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 120ms;
+            flex-shrink: 0;
+            padding: 0;
+        }
+        .btn-qty:hover { background: #e5e7eb; }
+        .btn-number {
+            width: 1.75rem;
+            height: 1.625rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.375rem;
+            background: #fff;
+            color: #374151;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-align: center;
+            padding: 0;
+            -moz-appearance: textfield;
+            appearance: textfield;
+        }
+        .btn-number::-webkit-inner-spin-button { -webkit-appearance: none; }
+        .btn-add {
+            margin-left: auto;
+            width: 1.625rem;
+            height: 1.625rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            border-radius: 0.375rem;
+            background: #10b981;
+            color: #fff;
+            font-size: 0.9375rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 120ms, box-shadow 120ms;
+            flex-shrink: 0;
+            padding: 0;
+        }
+        .btn-add:hover { background: #059669; box-shadow: 0 2px 6px rgba(16,185,129,0.35); }
     </style>
 </head>
 <body class="bg-pattern">
@@ -156,7 +259,7 @@
                 <div class="flex items-center space-x-3">
                     <div class="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-600 rounded-lg flex items-center justify-center">
                         <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
                         </svg>
                     </div>
                     <span class="font-serif text-2xl font-bold text-gray-800">Salsabila Track</span>

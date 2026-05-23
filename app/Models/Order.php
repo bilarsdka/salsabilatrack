@@ -117,53 +117,27 @@ class Order extends Model
     }
 
     /**
-     * Get dynamic estimated remaining time based on current status
-     * Used for tracking page to show updated estimates
+     * Get dynamic estimated remaining time based on current status and elapsed time.
+     * Uses metadata only — no heavy DB queries — and is safe for all statuses.
      */
     public function getDynamicEstimateAttribute()
     {
-        // If order is completed, return 'Selesai'
+        // Completed orders show 'Selesai'
         if ($this->status === 'completed') {
             return 'Selesai';
         }
 
-        // If no estimated_duration set, use default
-        if (! $this->estimated_duration) {
-            return 45;
-        }
+        $estimated = (int) ($this->estimated_duration ?: 45);
 
-        // Calculate elapsed time since order was created
-        $orderTime = $this->created_at ?? now();
-        $elapsedMinutes = now()->diffInMinutes($orderTime);
+        // Reference point: when the order was placed
+        $reference = $this->created_at ?? now();
+        $elapsed   = now()->diffInMinutes($reference);   // minutes already passed
 
-        // Estimate remaining time based on status
-        switch ($this->status) {
-            case 'waiting':
-                // Still waiting, show full estimate minus elapsed time
-                return max(5, $this->estimated_duration - $elapsedMinutes);
+        // Remaining estimate (never below 0)
+        $remaining = max(0, $estimated - $elapsed);
 
-            case 'processing':
-                // Get average processing time from completed orders
-                $avgProcessingTime = $this->getAverageTimeForStatus('processing');
-                $elapsedSinceStarted = $this->started_at ? now()->diffInMinutes($this->started_at) : 0;
-                $remaining = max(5, $avgProcessingTime - $elapsedSinceStarted);
-
-                return $remaining;
-
-            case 'shipped':
-                // Get average shipping time from completed orders
-                $avgShippingTime = $this->getAverageTimeForStatus('shipped');
-                $shippedAt = $this->started_at ? $this->started_at->addMinutes(
-                    $this->getAverageTimeForStatus('processing')
-                ) : now();
-                $elapsedSinceShipped = now()->diffInMinutes($shippedAt);
-                $remaining = max(5, $avgShippingTime - $elapsedSinceShipped);
-
-                return $remaining;
-
-            default:
-                return $this->estimated_duration;
-        }
+        // Don't floor at 5 — show 0 when time is up so customer knows it's done
+        return $remaining;
     }
 
     /**

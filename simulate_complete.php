@@ -1,13 +1,13 @@
 <?php
 
+use App\Models\Order;
+use Illuminate\Http\Request;
+
 require __DIR__.'/vendor/autoload.php';
 $app = require_once __DIR__.'/bootstrap/app.php';
 $app->make('Illuminate\Contracts\Http\Kernel')->handle(
     Request::create('/test', 'GET')
 );
-
-use App\Models\Order;
-use Illuminate\Http\Request;
 
 // Find an order that is not completed
 $order = Order::where('order_number', 'ORD-0-1')->first();

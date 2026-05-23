@@ -1,7 +1,7 @@
 <?php
 
 $base = 'http://127.0.0.1:8025';
-$cookieFile = 'D:\salsabilatrack\test_cookies.txt';
+$cookieFile = __DIR__.'/test_cookies.txt';
 
 // 1. GET admin page for CSRF token
 $ch = curl_init("$base/admin");

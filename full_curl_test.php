@@ -11,11 +11,12 @@ $page = curl_exec($ch);
 if (curl_errno($ch)) {
     exit('Error: '.curl_error($ch));
 }
-preg_match('/name="csrf-token" content="([^"]+)"/', $page, $m);
-$token = $m[1] ?? '';
-echo 'Token: '.substr($token, 0, 20)."...\n";
+    preg_match('/name="csrf-token" content="([^"]+)"/', $page, $m);
+    $token = $m[1] ?? '';
+    echo 'Token: '.substr($token, 0, 20)."...\n";
+    curl_close($ch);
 
-// Create order
+    // Create order
 $ch2 = curl_init($base.'/admin/orders');
 curl_setopt($ch2, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($ch2, CURLOPT_POST, true);

@@ -24,8 +24,41 @@
                     class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
                     placeholder="Masukkan nama customer..." required>
             </div>
-            
-            <div>
+
+            <!-- Menu Selection Section -->
+            <div class="md:col-span-2 mb-2">
+                <div class="flex items-center gap-3 mb-3">
+                    <svg class="w-5 h-5 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                    </svg>
+                    <h3 class="font-semibold text-gray-800 text-lg">Pilih Menu</h3>
+                </div>
+
+                <!-- Tabs -->
+                <div class="flex gap-2 mb-3 flex-wrap">
+                    <button type="button" class="menu-tab active px-4 py-2 rounded-lg text-sm font-semibold bg-primary-500 text-white transition" data-tab="makanan">🍽️ Makanan</button>
+                    <button type="button" class="menu-tab px-4 py-2 rounded-lg text-sm font-semibold bg-gray-100 text-gray-600 hover:bg-gray-200 transition" data-tab="minuman">🥤 Minuman</button>
+                    <button type="button" class="menu-tab px-4 py-2 rounded-lg text-sm font-semibold bg-gray-100 text-gray-600 hover:bg-gray-200 transition" data-tab="tambahan">➕ Tambahan</button>
+                </div>
+
+                <!-- Menu Search -->
+                <div class="mb-3">
+                    <input type="text" id="menu-search" placeholder="🔍 Cari menu..." class="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:ring-2 focus:ring-primary-500 text-sm">
+                </div>
+
+                <!-- Menu Panels -->
+                <div id="menu-panel-makanan" class="menu-panel card-grid hidden"></div>
+                <div id="menu-panel-minuman" class="menu-panel card-grid hidden"></div>
+                <div id="menu-panel-tambahan" class="menu-panel card-grid hidden"></div>
+
+                <!-- Selected items preview -->
+                <div id="selected-preview" class="mt-3 hidden">
+                    <p class="text-xs font-semibold text-gray-500 mb-1">Item terpilih:</p>
+                    <div id="selected-items" class="flex flex-wrap gap-1"></div>
+                </div>
+            </div>
+
+            <div class="md:col-span-2">
                 <label class="block text-sm font-semibold text-gray-700 mb-2">Detail Pesanan</label>
                 <input type="text" id="order-items" name="order_items"
                     class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
@@ -607,5 +640,183 @@ function showToast(message, type = 'success') {
         toast.classList.remove('show');
     }, 3000);
 }
+// ─── MENU DATA & SELECTION ─────────────────────────────────
+const MENU_DATA = {
+    makanan: [
+        'Nasgor Kebuli Sapi', 'Nasgor Kebuli Katsu', 'Nasgor Kebuli Ayam',
+        'Nasi Mie Goreng Ayam Geprek', 'Nasi Mie Goreng Ayam Bakar', 'Nasi Mie Goreng Ayam Goreng',
+        'Kentang Katsu Salad', 'Nasi Katsu Salad', 'Kentang Katsu', 'Nasi Katsu',
+        'Kentang Cheese', 'Nasi Cheese', 'Kentang Cheese Salad', 'Nasi Cheese Salad',
+        'Nasi Ayam Geprek Gobyos + Tempe', 'Nasi Ayam Penyet Bakar + Tempe',
+        'Nasi Ayam Penyet Goreng + Tempe', 'Nasi Lele Penyet + Tempe', 'Nasi SFC + Tempe',
+        'Kentang Goreng Saus', 'Nasi Soto Babat', 'Nasi Soto Ayam', 'Kenplingju', 'Nasi Soto Sapi',
+    ],
+    minuman: [
+        'Chocolatos Drink', 'Jeruk Susu Es', 'Jeruk Susu Hangat', 'Jeruk Es', 'Jeruk Hangat',
+        'Teh Susu Es', 'Teh Susu Hangat', 'Kuku Bima Susu Es', 'Extra Jos Susu Es',
+        'Es Laguna Salsabilla', 'Hilo Es', 'Hilo Hangat', 'Susu Putih Es', 'Susu Putih Hangat',
+        'Susu Coklat Es', 'Susu Coklat Hangat', 'Cappucino Coffe Es', 'Cappucino Coffe Hangat',
+        'Lemon Tea Es', 'Lemon Tea Hangat', 'Orange Squash Es', 'Orange Squash Hangat',
+        'Teh Tarik Es', 'Teh Tarik Hangat', 'Teh Leci Es', 'Teh Leci Hangat',
+        'Teh Melon Es', 'Teh Melon Hangat', 'Teh Mangga Es', 'Teh Mangga Hangat',
+        'Kopi Hitam', 'Teh Manis Es', 'Teh Manis Hangat', 'Teh Tawar Es', 'Teh Tawar Hangat',
+        'Es Batu', 'Air Mineral 1,5 L', 'Air Mineral 300 ml', 'Aneka Nutrisari Es', 'Aneka Nutrisari Hangat',
+    ],
+    tambahan: [
+        'Telor Dadar', 'Telor Ceplok', 'Kerupuk Udang', 'Peyek', 'Tahu Goreng', 'Tempe Goreng',
+        'Mendoan', 'Bala-bala', 'Bacem Tahu', 'Bacem Tempe', 'Kol Goreng', 'Terong Goreng',
+        'Nasi', 'Sambal',
+    ],
+};
+
+// Current state of selected items (label → qty)
+const selectedItems = {};
+
+// Parse the display name back to the canonical menu name
+function getCanonicalName(display) {
+    return display.replace(/^(\d+x)\s*/, '');
+}
+
+// Add item → order-items field
+function addMenuToOrder(itemText) {
+    const field = document.getElementById('order-items');
+    const current = field.value.trim();
+    field.value = current ? current + ', ' + itemText : itemText;
+    field.focus();
+    showToast('Ditambahkan: ' + itemText);
+}
+
+// Update selected preview
+function updatePreview() {
+    const preview = document.getElementById('selected-preview');
+    const container = document.getElementById('selected-items');
+    const entries = Object.entries(selectedItems).filter(([, v]) => v > 0);
+    if (entries.length === 0) {
+        preview.classList.add('hidden');
+        return;
+    }
+    preview.classList.remove('hidden');
+    container.innerHTML = entries.map(([k, v]) =>
+        '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-primary-100 text-primary-700">' +
+            v + 'x ' + k +
+        '</span>'
+    ).join('');
+}
+
+// ─── Render a single menu card into a panel ─────────────────────────────────
+function renderMenuItem(item, panel) {
+    // Support both a plain string ("Nasi Goreng") and the old
+    // { name: 'Nasi Goreng' } object shape so both MENU_DATA formats work.
+    const name = typeof item === 'string' ? item : item.name;
+
+    // Card
+    const card = document.createElement('div');
+    card.className = 'menu-card';
+
+    const accent = document.createElement('div');
+    accent.className = 'card-accent';
+    card.appendChild(accent);
+
+    // Body — item name label
+    const body = document.createElement('div');
+    body.className = 'card-body';
+
+    const nameSpan = document.createElement('span');
+    nameSpan.className = 'card-name';
+    nameSpan.textContent = name;
+    body.appendChild(nameSpan);
+    card.appendChild(body);
+
+    // Footer — qty controls + add button
+    const footer = document.createElement('div');
+    footer.className = 'card-footer';
+
+    const decBtn = document.createElement('button');
+    decBtn.type = 'button';
+    decBtn.textContent = '−';
+    decBtn.className = 'btn-qty';
+
+    const qtyInput = document.createElement('input');
+    qtyInput.type = 'number';
+    qtyInput.min = 1; qtyInput.max = 99; qtyInput.value = 1;
+    qtyInput.className = 'btn-number';
+
+    const incBtn = document.createElement('button');
+    incBtn.type = 'button';
+    incBtn.textContent = '+';
+    incBtn.className = 'btn-qty';
+
+    const addBtn = document.createElement('button');
+    addBtn.type = 'button';
+    addBtn.textContent = '+';
+    addBtn.className = 'btn-add';
+
+    decBtn.addEventListener('click', () => {
+        const v = Math.max(1, parseInt(qtyInput.value || '1'));
+        qtyInput.value = v - 1;
+    });
+
+    incBtn.addEventListener('click', () => {
+        const v = Math.min(99, parseInt(qtyInput.value || '1'));
+        qtyInput.value = v + 1;
+    });
+
+    addBtn.addEventListener('click', () => {
+        const qty = Math.max(1, parseInt(qtyInput.value || '1'));
+        const itemText = qty + 'x ' + name;
+        selectedItems[name] = (selectedItems[name] || 0) + qty;
+        updatePreview();
+        addMenuToOrder(itemText);
+    });
+
+    footer.appendChild(decBtn);
+    footer.appendChild(qtyInput);
+    footer.appendChild(incBtn);
+    footer.appendChild(addBtn);
+    card.appendChild(footer);
+
+    panel.appendChild(card);
+}
+
+// ─── Populate all panels ────────────────────────────────────────────────────
+function buildPanels() {
+    ['makanan', 'minuman', 'tambahan'].forEach(cat => {
+        const panel = document.getElementById('menu-panel-' + cat);
+        if (!panel) return;
+        panel.innerHTML = '';
+        MENU_DATA[cat].forEach(item => renderMenuItem(item, panel));
+    });
+}
+
+// ─── Tab switching ──────────────────────────────────────────────────────────
+document.querySelectorAll('.menu-tab').forEach(btn => {
+    btn.addEventListener('click', function () {
+        const tab = this.dataset.tab;
+        document.querySelectorAll('.menu-tab').forEach(b => {
+            b.classList.remove('bg-primary-500', 'text-white');
+            b.classList.add('bg-gray-100', 'text-gray-600');
+        });
+        this.classList.remove('bg-gray-100', 'text-gray-600');
+        this.classList.add('bg-primary-500', 'text-white');
+        document.querySelectorAll('.menu-panel').forEach(p => p.classList.add('hidden'));
+        document.getElementById('menu-panel-' + tab).classList.remove('hidden');
+    });
+});
+
+// ─── Search filter ──────────────────────────────────────────────────────────
+document.getElementById('menu-search').addEventListener('input', function () {
+    const q = this.value.toLowerCase().trim();
+    ['makanan', 'minuman', 'tambahan'].forEach(cat => {
+        const panel = document.getElementById('menu-panel-' + cat);
+        if (!panel) return;
+        panel.querySelectorAll(':scope > div').forEach(el => {
+            const text = (el.textContent || '').toLowerCase();
+            el.style.display = text.includes(q) ? '' : 'none';
+        });
+    });
+});
+
+// ─── Init ───────────────────────────────────────────────────────────────────
+buildPanels();
 </script>
 @endsection

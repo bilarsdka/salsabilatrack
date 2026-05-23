@@ -12,17 +12,14 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('orders', function (Blueprint $table) {
-            //
+            $table->string('jam_kategori', 20)->nullable()->after('prediction');
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::table('orders', function (Blueprint $table) {
-            //
+            $table->dropColumn('jam_kategori');
         });
     }
 };
