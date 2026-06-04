@@ -3,183 +3,519 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Tracking Delivery</title>
+    <title>Salsabilla Food - Tracking Delivery</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
-        /* ================= UI STYLE ================= */
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f4f7f6; margin: 0; padding: 20px; color: #333; }
-        .container { max-width: 1000px; margin: auto; background: white; padding: 25px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
-        h1, h2, h3 { color: #2c3e50; margin-top: 0; }
-        
+        /* ================= PROFESSIONAL UMKM FOOD THEME ================= */
+        :root {
+            --primary: #d35400;
+            --primary-dark: #a04000;
+            --secondary: #e67e22;
+            --accent: #e8f4fc;
+            --success: #27ae60;
+            --warning: #f39c12;
+            --info: #3498db;
+            --danger: #e74c3c;
+            --light: #fefefe;
+            --dark: #2c3e50;
+            --gray: #95a5a6;
+            --light-gray: #ecf0f1;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #fff5f0 0%, #fefefe 100%);
+            margin: 0;
+            padding: 0;
+            color: var(--dark);
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 20px 0;
+            box-shadow: 0 4px 15px rgba(211, 84, 0, 0.2);
+        }
+
+        .header .container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            max-width: 1200px;
+            margin: auto;
+            padding: 0 25px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .logo i {
+            font-size: 32px;
+        }
+
+        .tagline {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-top: 4px;
+        }
+
+        /* Main Container */
+        .main-container {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 0 25px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+            padding: 25px;
+            margin-bottom: 25px;
+            border: 1px solid #f0f0f0;
+        }
+
+        h1, h2, h3 {
+            color: var(--primary-dark);
+            margin-top: 0;
+            font-weight: 600;
+        }
+
+        h1 { font-size: 28px; }
+        h2 { font-size: 22px; }
+        h3 { font-size: 18px; }
+
         /* Form & Buttons */
-        .form-group { margin-bottom: 15px; }
-        label { font-weight: bold; display: block; margin-bottom: 5px; }
-        input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
-        button { padding: 10px 15px; background: #2c3e50; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
-        button:hover { background: #1a252f; }
-        .btn-sm { padding: 6px 10px; font-size: 12px; margin-right: 5px; margin-bottom: 5px; }
-        
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            font-weight: 600;
+            display: block;
+            margin-bottom: 8px;
+            color: var(--dark);
+        }
+
+        input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 15px;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(211, 84, 0, 0.1);
+        }
+
+        input::placeholder {
+            color: #bbb;
+        }
+
+        button {
+            padding: 12px 20px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 15px;
+            transition: transform 0.2s, box-shadow 0.3s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(211, 84, 0, 0.3);
+        }
+
+        .btn-sm {
+            padding: 8px 12px;
+            font-size: 13px;
+            margin-right: 8px;
+            margin-bottom: 8px;
+            border-radius: 6px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .btn-sm:hover {
+            transform: none;
+            opacity: 0.9;
+        }
+
         /* Tables */
-        .table-responsive { overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; font-size: 14px; }
-        th { background: #ecf0f1; }
-        
+        .table-responsive {
+            overflow-x: auto;
+            border-radius: 8px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            font-size: 14px;
+        }
+
+        th {
+            background: linear-gradient(135deg, var(--secondary) 0%, var(--primary) 100%);
+            color: white;
+            padding: 14px 12px;
+            text-align: left;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 12px;
+            letter-spacing: 0.5px;
+        }
+
+        td {
+            padding: 14px 12px;
+            border-bottom: 1px solid #f0f0f0;
+            transition: background 0.2s;
+        }
+
+        tr:hover {
+            background: rgba(232, 244, 252, 0.3);
+        }
+
         /* Badges / Status Colors */
-        .badge { padding: 5px 10px; border-radius: 12px; font-size: 12px; font-weight: bold; color: white; display: inline-block; }
-        .bg-kuning { background: #f1c40f; color: #333; }
-        .bg-biru { background: #3498db; }
-        .bg-oranye { background: #e67e22; }
-        .bg-hijau { background: #2ecc71; }
-        .bg-merah { background: #e74c3c; }
-        .bg-abu { background: #95a5a6; }
+        .badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .bg-kuning { background: linear-gradient(135deg, #f1c40f 0%, #f39c12 100%); color: white; }
+        .bg-biru { background: linear-gradient(135deg, #3498db 0%, #2980b9 100%); color: white; }
+        .bg-oranye { background: linear-gradient(135deg, #e67e22 0%, #d35400 100%); color: white; }
+        .bg-hijau { background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%); color: white; }
+        .bg-merah { background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); color: white; }
+        .bg-abu { background: #bdc3c7; color: white; }
 
         /* Link Container */
-        #link-container { margin-top: 15px; padding: 15px; background: #d4edda; border: 1px solid #c3e6cb; color: #155724; border-radius: 5px; display: none; align-items: center; justify-content: space-between; }
-        #tracking-url { font-weight: bold; color: #0056b3; text-decoration: none; word-break: break-all; }
+        #link-container {
+            margin-top: 20px;
+            padding: 20px;
+            background: linear-gradient(135deg, #e8f5e9 0%, #d4edda 100%);
+            border: 2px solid #c3e6cb;
+            border-radius: 10px;
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+        }
+
+        #link-container i {
+            color: var(--success);
+            font-size: 24px;
+        }
+
+        #tracking-url {
+            font-weight: 600;
+            color: var(--primary-dark);
+            text-decoration: none;
+            word-break: break-all;
+            flex: 1;
+        }
 
         /* Progress Bar (Tracking Page) */
-        .tracking-card { border: 1px solid #eee; padding: 20px; border-radius: 8px; margin-bottom: 30px; }
-        .progress-container { display: flex; justify-content: space-between; position: relative; margin: 40px 0 60px 0; max-width: 600px; margin-left: auto; margin-right: auto; }
-        .progress-container::before { content: ''; background: #e0e0e0; position: absolute; top: 50%; left: 0; transform: translateY(-50%); height: 4px; width: 100%; z-index: 1; }
-        .progress-bar { background: #2ecc71; position: absolute; top: 50%; left: 0; transform: translateY(-50%); height: 4px; width: 0%; z-index: 1; transition: 0.4s ease; }
-        .circle { background: #fff; border: 3px solid #e0e0e0; border-radius: 50%; height: 30px; width: 30px; display: flex; align-items: center; justify-content: center; z-index: 2; transition: 0.4s ease; position: relative; }
-        .circle.active { border-color: #2ecc71; background: #2ecc71; color: white; }
-        .step-label { position: absolute; top: 40px; left: 50%; transform: translateX(-50%); font-size: 13px; font-weight: bold; color: #7f8c8d; text-align: center; width: max-content; }
-        .circle.active .step-label { color: #2c3e50; }
+        .tracking-card {
+            border: 1px solid #f0f0f0;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            background: var(--accent);
+        }
+
+        .progress-container {
+            display: flex;
+            justify-content: space-between;
+            position: relative;
+            margin: 50px 0 70px 0;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .progress-container::before {
+            content: '';
+            background: #e0e0e0;
+            position: absolute;
+            top: 50%;
+            left: 0;
+            transform: translateY(-50%);
+            height: 6px;
+            width: 100%;
+            z-index: 1;
+            border-radius: 3px;
+        }
+
+        .progress-bar {
+            background: linear-gradient(135deg, var(--success) 0%, #1abc9c 100%);
+            position: absolute;
+            top: 50%;
+            left: 0;
+            transform: translateY(-50%);
+            height: 6px;
+            width: 0%;
+            z-index: 1;
+            transition: 0.4s ease;
+            border-radius: 3px;
+        }
+
+        .circle {
+            background: white;
+            border: 3px solid #e0e0e0;
+            border-radius: 50%;
+            height: 40px;
+            width: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2;
+            transition: 0.4s ease;
+            position: relative;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .circle.active {
+            border-color: var(--success);
+            background: linear-gradient(135deg, var(--success) 0%, #1abc9c 100%);
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .step-label {
+            position: absolute;
+            top: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--gray);
+            text-align: center;
+            width: max-content;
+            white-space: nowrap;
+        }
+
+        .circle.active .step-label {
+            color: var(--success);
+        }
 
         .hidden { display: none !important; }
 
-/* ================= TAMBAHAN MOBILE RESPONSIVE ================= */
-@media (max-width: 768px) {
+        /* Card for new order */
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            border: 1px solid #f0f0f0;
+        }
 
-    body {
-        padding: 10px;
-    }
+        .card h3 {
+            margin-top: 0;
+            padding-bottom: 15px;
+            border-bottom: 2px dashed var(--light-gray);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
 
-    .container {
-        padding: 15px;
-        border-radius: 6px;
-    }
+        .card h3 i {
+            color: var(--primary);
+        }
 
-    h1 {
-        font-size: 20px;
-        text-align: center;
-    }
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 30px;
+            color: var(--gray);
+            font-size: 14px;
+            margin-top: 40px;
+        }
 
-    input {
-        font-size: 14px;
-    }
+        .footer i {
+            color: var(--primary);
+            margin-right: 5px;
+        }
 
-    button {
-        width: 100%;
-        padding: 12px;
-    }
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header .container {
+                flex-direction: column;
+                text-align: center;
+                padding: 15px;
+            }
 
-    .table-responsive {
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-    }
+            .logo {
+                margin-bottom: 10px;
+            }
 
-    table {
-        font-size: 12px;
-        min-width: 600px;
-    }
+            .main-container {
+                padding: 0 15px;
+            }
 
-    th, td {
-        padding: 8px;
-        white-space: nowrap;
-    }
+            .container {
+                padding: 20px 15px;
+                border-radius: 8px;
+            }
 
-    .progress-container {
-        transform: scale(0.9);
-    }
-}
+            h1 {
+                font-size: 22px;
+            }
+
+            input {
+                font-size: 14px;
+            }
+
+            button {
+                width: 100%;
+                padding: 12px;
+            }
+
+            #link-container {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .progress-container {
+                transform: scale(0.85);
+                margin: 40px 0 50px 0;
+            }
+
+            table {
+                font-size: 12px;
+                min-width: 700px;
+            }
+
+            th, td {
+                padding: 10px 8px;
+            }
+        }
     </style>
 </head>
 <body>
-
-    <div id="admin-view" class="container hidden">
-        <h1>Dashboard Admin Delivery</h1>
-        
-        <div style="background: #fdfdfd; padding: 15px; border: 1px solid #eee; border-radius: 8px; margin-bottom: 20px;">
-            <h3>Tambah Pesanan Baru</h3>
-            <div class="form-group">
-                <label>Nama Customer</label>
-                <input type="text" id="customer-name" placeholder="Masukkan nama customer...">
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="logo">
+                <i class="fas fa-utensils"></i>
+                <div>
+                    Salsabilla Food
+                    <div class="tagline">Delivery Tracking System</div>
+                </div>
             </div>
-            <div class="form-group">
-                <label>Nama Pesanan</label>
-                <input type="text" id="order-name" placeholder="Contoh: 2x Nasi Goreng, 1x Es Teh...">
-            </div>
-            <button onclick="addOrder()">Tambah Order</button>
         </div>
+    </header>
 
-        <div id="link-container">
-            <div>
-                <strong>Order berhasil dibuat!</strong> Link tracking: <br>
-                <a id="tracking-url" href="#" target="_blank"></a>
+    <div class="main-container">
+        <div id="admin-view" class="hidden">
+            <h1><i class="fas fa-tachometer-alt"></i> Dashboard Admin Delivery</h1>
+            
+            <div class="card">
+                <h3><i class="fas fa-plus-circle"></i> Tambah Pesanan Baru</h3>
+                <div class="form-group">
+                    <label>Nama Customer</label>
+                    <input type="text" id="customer-name" placeholder="Masukkan nama customer...">
+                </div>
+                <div class="form-group">
+                    <label>Nama Pesanan</label>
+                    <input type="text" id="order-name" placeholder="Contoh: 2x Nasi Goreng, 1x Es Teh...">
+                </div>
+                <button onclick="addOrder()"><i class="fas fa-save"></i> Tambah Order</button>
             </div>
-            <button onclick="copyLink()" style="background: #155724;">Copy Link</button>
-        </div>
 
-        <h3>Daftar Pesanan</h3>
-        <div class="table-responsive">
-            <table>
-                <thead>
-                    <tr>
-                        <th>ID Order</th>
-                        <th>Customer</th>
-                        <th>Pesanan</th>
-                        <th>Status</th>
-                        <th>Waktu Order</th>
-                        <th>Durasi</th>
-                        <th>Prediksi</th>
-                        <th>Aksi</th>
-                    </tr>
-                </thead>
-                <tbody id="table-body">
+            <div id="link-container">
+                <div>
+                    <i class="fas fa-check-circle"></i>
+                    <strong>Order berhasil dibuat!</strong><br>
+                    Link tracking: <a id="tracking-url" href="#" target="_blank"></a>
+                </div>
+                <button onclick="copyLink()" style="background: #27ae60;"><i class="fas fa-copy"></i> Copy Link</button>
+            </div>
+
+            <h3><i class="fas fa-list"></i> Daftar Pesanan</h3>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID Order</th>
+                            <th>Customer</th>
+                            <th>Pesanan</th>
+                            <th>Status</th>
+                            <th>Waktu Order</th>
+                            <th>Durasi</th>
+                            <th>Prediksi</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-body">
                     </tbody>
-            </table>
+                </table>
+            </div>
         </div>
-    </div>
 
-    <div id="track-view" class="container hidden">
-        <h1 style="text-align: center;">Tracking Pesanan</h1>
-        
-        <div id="tracking-content">
-            <div class="tracking-card">
-                <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 15px;">
-                    <div>
-                        <span style="color: #7f8c8d; font-size: 14px;">ID Order</span><br>
-                        <strong id="track-id" style="font-size: 18px;">-</strong>
+        <div id="track-view" class="hidden">
+            <h1 style="text-align: center;"><i class="fas fa-motorcycle"></i> Tracking Pesanan</h1>
+
+            <div id="tracking-content">
+                <div class="tracking-card">
+                    <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 15px;">
+                        <div>
+                            <span style="color: var(--gray); font-size: 14px;">ID Order</span><br>
+                            <strong id="track-id" style="font-size: 18px;">-</strong>
+                        </div>
+                        <div style="text-align: right;">
+                            <span style="color: var(--gray); font-size: 14px;">Estimasi Waktu</span><br>
+                            <strong style="font-size: 18px; color: var(--secondary);">30 - 45 Menit</strong>
+                        </div>
                     </div>
-                    <div style="text-align: right;">
-                        <span style="color: #7f8c8d; font-size: 14px;">Estimasi Waktu</span><br>
-                        <strong style="font-size: 18px; color: #e67e22;">30 - 45 Menit</strong>
-                    </div>
+                    
+                    <h2 id="track-customer" style="margin-bottom: 5px;">-</h2>
+                    <p id="track-order" style="color: var(--gray); margin-top: 0;">-</p>
+                    <div style="margin-top: 15px;">Status saat ini: <span id="track-status-badge"></span></div>
+                </div>
+
+                <div class="progress-container">
+                    <div class="progress-bar" id="progress"></div>
+                    <div class="circle" id="step-1">1<div class="step-label">Menunggu</div></div>
+                    <div class="circle" id="step-2">2<div class="step-label">Diproses</div></div>
+                    <div class="circle" id="step-3">3<div class="step-label">Dikirim</div></div>
+                    <div class="circle" id="step-4">4<div class="step-label">Selesai</div></div>
                 </div>
                 
-                <h2 id="track-customer" style="margin-bottom: 5px;">-</h2>
-                <p id="track-order" style="color: #7f8c8d; margin-top: 0;">-</p>
-                <div style="margin-top: 15px;">Status saat ini: <span id="track-status-badge"></span></div>
             </div>
 
-            <div class="progress-container">
-                <div class="progress-bar" id="progress"></div>
-                <div class="circle" id="step-1">1<div class="step-label">Menunggu</div></div>
-                <div class="circle" id="step-2">2<div class="step-label">Diproses</div></div>
-                <div class="circle" id="step-3">3<div class="step-label">Dikirim</div></div>
-                <div class="circle" id="step-4">4<div class="step-label">Selesai</div></div>
+            <div id="tracking-not-found" class="hidden" style="text-align: center; padding: 40px;">
+                <h2><i class="fas fa-exclamation-circle"></i> Pesanan Tidak Ditemukan</h2>
+                <p>Silakan periksa kembali Link / ID Order Anda.</p>
+                <button onclick="window.location.href='index.html'"><i class="fas fa-arrow-left"></i> Kembali</button>
             </div>
-            
-        </div>
-        
-        <div id="tracking-not-found" class="hidden" style="text-align: center; padding: 40px;">
-            <h2>Pesanan Tidak Ditemukan</h2>
-            <p>Silakan periksa kembali Link / ID Order Anda.</p>
-            <button onclick="window.location.href='index.html'">Kembali</button>
         </div>
     </div>
+
+    <footer class="footer">
+        <i class="fas fa-copyright"></i> 2026 Salsabilla Food - Sistem Tracking Delivery Profesional
+    </footer>
 
     <script>
         // Array penyimpanan (Disimpan di localStorage agar tidak hilang saat di-refresh/buka tab baru)
