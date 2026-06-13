@@ -13,7 +13,6 @@ Homestead.yaml
 Homestead.json
 .phpstorm.meta.php
 /_ide_helper.php
-composer.lock
 npm-debug.log
 yarn-error.log
 .DS_Store

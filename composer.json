@@ -39,7 +39,8 @@
     },
     "config": {
         "audit": {
-            "abandoned": "ignore"
+            "abandoned": "ignore",
+            "block-insecure": false
         },
         "allow-plugins": {
             "pestphp/pest-plugin": true,
