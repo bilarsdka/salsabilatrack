@@ -37,6 +37,15 @@
             "@php artisan key:generate --ansi"
         ]
     },
+    "config": {
+        "audit": {
+            "abandoned": "ignore"
+        },
+        "allow-plugins": {
+            "pestphp/pest-plugin": true,
+            "php-http/discovery": true
+        }
+    },
     "minimum-stability": "stable",
     "prefer-stable": true
 }
