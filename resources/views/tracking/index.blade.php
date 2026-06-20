@@ -58,7 +58,7 @@
                     </div>
                     @if($order->duration_minutes)
                     <div class="flex justify-between md:flex-col md:items-end">
-                        <span class="text-gray-500">Durasi Perjalanan:</span>
+                        <span class="text-gray-500">Durasi Pesanan:</span>
                         <span class="font-mono font-semibold text-gray-900">{{ $order->duration_minutes }} menit</span>
                     </div>
                     @endif

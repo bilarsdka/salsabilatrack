@@ -174,17 +174,15 @@ class OrderController extends Controller
 
         $order->status = $status;
 
-        // Set timestamps based on status changes
-        if ($status === 'processing' && ! $order->started_at) {
-            $order->started_at = now();
-        } elseif ($status === 'completed') {
+        // Calculate duration from when the order was added (created_at)
+        if ($status === 'completed') {
             $order->completed_at = now();
 
             if (! $order->started_at) {
                 $order->started_at = $order->created_at ?? now();
             }
 
-            $startTime = $order->started_at;
+            $startTime = $order->created_at ?? $order->started_at ?? now();
             $now = now();
 
             $duration = $startTime->diffInMinutes($now);

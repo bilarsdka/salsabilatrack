@@ -58,12 +58,6 @@
                 <div id="menu-panel-makanan" class="menu-panel card-grid hidden"></div>
                 <div id="menu-panel-minuman" class="menu-panel card-grid hidden"></div>
                 <div id="menu-panel-tambahan" class="menu-panel card-grid hidden"></div>
-
-                <!-- Selected items preview -->
-                <div id="selected-preview" class="mt-3 hidden">
-                    <p class="text-xs font-semibold text-gray-500 mb-1">Item terpilih:</p>
-                    <div id="selected-items" class="flex flex-wrap gap-1"></div>
-                </div>
             </div>
 
             <div class="md:col-span-2">
@@ -138,6 +132,7 @@
                         <th class="px-4 py-4 text-center text-xs font-bold uppercase tracking-wide w-24">Estimasi</th>
                         <th class="px-4 py-4 text-center text-xs font-bold uppercase tracking-wide w-24">Status</th>
                         <th class="px-4 py-4 text-center text-xs font-bold uppercase tracking-wide w-20">Waktu</th>
+                        <th class="px-4 py-4 text-center text-xs font-bold uppercase tracking-wide w-24">Selesai</th>
                         <th class="px-4 py-4 text-center text-xs font-bold uppercase tracking-wide w-20">Durasi</th>
                         <th class="px-4 py-4 text-center text-xs font-bold uppercase tracking-wide w-24">Prediksi</th>
                         <th class="px-4 py-4 text-center text-xs font-bold uppercase tracking-wide w-24">Hasil</th>
@@ -245,7 +240,7 @@ async function loadOrders() {
                 // Empty state
                 tbody.innerHTML = `
                     <tr>
-                        <td colspan="11" class="px-4 py-16 text-center text-gray-500">
+                        <td colspan="12" class="px-4 py-16 text-center text-gray-500">
                             <div class="flex flex-col items-center justify-center">
                                 <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
                                     <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -417,6 +412,11 @@ function createOrderRow(order) {
             break;
     }
     
+    // Completion time
+    const completedTime = order.completed_at
+        ? new Date(order.completed_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })
+        : '-';
+    
     // Duration text
     const durationText = order.duration_minutes !== null && order.duration_minutes !== undefined 
         ? order.duration_minutes + 'm' 
@@ -460,6 +460,9 @@ function createOrderRow(order) {
         </td>
         <td class="px-4 py-3 text-center text-sm">
             <span class="text-gray-600 font-mono font-medium">${order.order_time}</span>
+        </td>
+        <td class="px-4 py-3 text-center text-sm">
+            <span class="${completedTime !== '-' ? 'text-green-700 font-bold' : 'text-gray-400'}">${completedTime}</span>
         </td>
         <td class="px-4 py-3 text-center text-sm">
             <span class="font-mono font-bold text-gray-800">${durationText}</span>
@@ -688,14 +691,6 @@ const MENU_DATA = {
     ],
 };
 
-// Current state of selected items (label → qty)
-const selectedItems = {};
-
-// Parse the display name back to the canonical menu name
-function getCanonicalName(display) {
-    return display.replace(/^(\d+x)\s*/, '');
-}
-
 // Add item → order-items field
 function addMenuToOrder(itemText) {
     const field = document.getElementById('order-items');
@@ -703,23 +698,6 @@ function addMenuToOrder(itemText) {
     field.value = current ? current + ', ' + itemText : itemText;
     field.focus();
     showToast('Ditambahkan: ' + itemText);
-}
-
-// Update selected preview
-function updatePreview() {
-    const preview = document.getElementById('selected-preview');
-    const container = document.getElementById('selected-items');
-    const entries = Object.entries(selectedItems).filter(([, v]) => v > 0);
-    if (entries.length === 0) {
-        preview.classList.add('hidden');
-        return;
-    }
-    preview.classList.remove('hidden');
-    container.innerHTML = entries.map(([k, v]) =>
-        '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-primary-100 text-primary-700">' +
-            v + 'x ' + k +
-        '</span>'
-    ).join('');
 }
 
 // ─── Render a single menu card into a panel ─────────────────────────────────
@@ -783,8 +761,6 @@ function renderMenuItem(item, panel) {
     addBtn.addEventListener('click', () => {
         const qty = Math.max(1, parseInt(qtyInput.value || '1'));
         const itemText = qty + 'x ' + name;
-        selectedItems[name] = (selectedItems[name] || 0) + qty;
-        updatePreview();
         addMenuToOrder(itemText);
     });
 
